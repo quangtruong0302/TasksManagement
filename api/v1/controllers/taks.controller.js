@@ -18,7 +18,6 @@ module.exports.index = async (req, res) => {
   if (req.query.keyword) {
     find.title = objSearch.regex;
   }
-  console.log(find);
   const countTask = await Task.countDocuments(find);
   const objPagination = paginationHelper(
     {
@@ -46,4 +45,81 @@ module.exports.detail = async (req, res) => {
   } catch (error) {
     res.json("Không tìm thấy");
   }
+};
+
+// [PATCH] /api/v1/tasks/change-status/:id
+module.exports.changeStatus = async (req, res) => {
+  try {
+    await Task.updateOne(
+      { _id: req.params.id, deleted: false },
+      { status: req.body.status }
+    );
+    const id = req.params.id;
+    res.json({
+      code: 200,
+      message: "Cập nhật trạng thái thành công!",
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Không tồn tại",
+    });
+  }
+};
+
+// [PATCH] /api/v1/tasks/change-multi
+module.exports.changeMulti = async (req, res) => {
+  const { ids, key, value } = req.body;
+  try {
+    switch (key) {
+      case "status":
+        await Task.updateMany({ _id: { $in: ids } }, { status: value });
+        res.json({
+          code: 200,
+          message: "Cập nhật thành công",
+        });
+        break;
+      case "delete":
+        await Task.updateMany({ _id: { $in: ids } }, { deleted: value });
+        res.json({
+          code: 200,
+          message: "Cập nhật thành công",
+        });
+        break;
+      default:
+        res.json({
+          code: 400,
+          message: "Không tồn tại",
+        });
+        break;
+    }
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Không tồn tại",
+    });
+  }
+};
+
+// [POST] /api/v1/task/create
+module.exports.create = async (req, res) => {
+  try {
+    const task = new Task(req.body);
+    const data = await task.save();
+    res.json({
+      code: 200,
+      massage: "Tạo thành công",
+      data: data,
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      massage: "Lỗi",
+    });
+  }
+};
+
+// [PATCH] /api/v1/task/edit
+module.exports.edit = async (req, res) => {
+  res.json(req.body);
 };

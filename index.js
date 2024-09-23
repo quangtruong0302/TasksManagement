@@ -4,6 +4,9 @@ require("dotenv").config();
 const database = require("./config/database");
 const Task = require("./api/v1/models/task.model");
 
+const bodyParser = require("body-parser");
+app.use(bodyParser.json());
+
 database.connect();
 
 const RouterV1 = require("./api/v1/routes/index.route");
