@@ -80,7 +80,10 @@ module.exports.changeMulti = async (req, res) => {
         });
         break;
       case "delete":
-        await Task.updateMany({ _id: { $in: ids } }, { deleted: value });
+        await Task.updateMany(
+          { _id: { $in: ids } },
+          { deleted: true, deletedAt: new Date() }
+        );
         res.json({
           code: 200,
           message: "Cập nhật thành công",
@@ -119,7 +122,40 @@ module.exports.create = async (req, res) => {
   }
 };
 
-// [PATCH] /api/v1/task/edit
+// [PATCH] /api/v1/task/edit/:id
 module.exports.edit = async (req, res) => {
-  res.json(req.body);
+  try {
+    await Task.updateOne({ _id: req.params.id }, { ...req.body });
+    res.json({
+      code: 200,
+      message: "Cập nhật thành công",
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Lỗi!",
+    });
+  }
+};
+
+// [DELETE] /api/v1/task/delete/:id
+module.exports.delete = async (req, res) => {
+  try {
+    await Task.updateOne(
+      { _id: req.params.id },
+      {
+        deleted: true,
+        deletedAt: new Date(),
+      }
+    );
+    res.json({
+      code: 200,
+      message: "Xoá thành công",
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Lỗi!",
+    });
+  }
 };
