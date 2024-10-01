@@ -71,6 +71,7 @@ module.exports.login = async (req, res) => {
   }
 };
 
+// [POST] /api/v1/users/password/fogot
 module.exports.forgotPassword = async (req, res) => {
   try {
     const email = req.body.email;
@@ -105,6 +106,89 @@ module.exports.forgotPassword = async (req, res) => {
     res.json({
       code: 400,
       message: "Lỗi!",
+    });
+  }
+};
+
+// [POST] /api/v1/users/password/otp
+module.exports.otpPassword = async (req, res) => {
+  try {
+    const checkOTP = await ForgotPassword.findOne({ ...req.body });
+    if (!checkOTP) {
+      res.json({
+        code: 400,
+        massage: "Mã OTP không hợp lệ!",
+      });
+      return;
+    } else {
+      const user = await User.findOne({ email: checkOTP.email });
+      const token = user.tokenUser;
+      res.cookie("token", token);
+      res.json({
+        code: 200,
+        massage: "Xác thực OTP thành công!",
+        token: token,
+      });
+    }
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Lỗi!",
+    });
+  }
+};
+
+// [POST] /api/v1/users/password/reset
+module.exports.resetPassword = async (req, res) => {
+  try {
+    const token = req.body.token;
+    const password = req.body.password;
+    const user = await User.findOne({
+      tokenUser: token,
+    });
+    if (!user) {
+      res.json({
+        code: 400,
+        massage: "User không tồn tại!",
+      });
+    } else {
+      const newPassword = md5(password);
+      if (newPassword === user.password) {
+        res.json({
+          code: 400,
+          message:
+            "Mật khẩu mới trùng với mật khẩu cũ. Vui lòng chọn mật khẩu khác!",
+        });
+      } else {
+        await User.updateOne({ tokenUser: token }, { password: newPassword });
+        res.json({
+          code: 200,
+          massage: "Đổi mật khẩu thành công",
+        });
+      }
+    }
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Lỗi",
+    });
+  }
+};
+
+//[GET] /api/v1/users/detail
+module.exports.detail = async (req, res) => {
+  try {
+    const user = await User.findOne({ tokenUser: req.body.token }).select(
+      "-password -tokenUser"
+    );
+    res.json({
+      code: 200,
+      message: "Thành công",
+      data: user,
+    });
+  } catch (error) {
+    res.json({
+      code: 200,
     });
   }
 };
