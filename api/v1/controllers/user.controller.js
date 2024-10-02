@@ -1,6 +1,6 @@
 const md5 = require("md5");
 const generateRandom = require("../../../helpers/generateString");
-const User = require("../models/user.mode");
+const User = require("../models/user.model");
 const ForgotPassword = require("../models/forgot-password.model");
 const sendMail = require("../../../helpers/sendMail");
 
@@ -69,6 +69,16 @@ module.exports.login = async (req, res) => {
       message: "Lỗi!",
     });
   }
+};
+
+// [GET] /api/v1/users/logout
+module.exports.logout = (req, res) => {
+  delete req.cookies.token;
+  delete req.headers.authorization;
+  res.json({
+    code: 200,
+    message: "Thành công!",
+  });
 };
 
 // [POST] /api/v1/users/password/fogot
@@ -178,17 +188,15 @@ module.exports.resetPassword = async (req, res) => {
 //[GET] /api/v1/users/detail
 module.exports.detail = async (req, res) => {
   try {
-    const user = await User.findOne({ tokenUser: req.body.token }).select(
-      "-password -tokenUser"
-    );
     res.json({
       code: 200,
       message: "Thành công",
-      data: user,
+      data: req.user,
     });
   } catch (error) {
     res.json({
-      code: 200,
+      code: 400,
+      message: "Lỗi!",
     });
   }
 };

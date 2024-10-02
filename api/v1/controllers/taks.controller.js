@@ -148,6 +148,7 @@ module.exports.delete = async (req, res) => {
         deletedAt: new Date(),
       }
     );
+
     res.json({
       code: 200,
       message: "Xoá thành công",
