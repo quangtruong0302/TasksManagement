@@ -1,9 +1,12 @@
 const Task = require("../models/task.model");
 const paginationHelper = require("../../../helpers/pagination");
 const searchHelper = require("../../../helpers/search");
+const User = require("../models/user.model");
+
 // [GET] /api/v1/tasks
 module.exports.index = async (req, res) => {
   const find = {
+    $or: [{ createdBy: req.user.id }, { listUser: req.user.id }],
     deleted: false,
   };
   if (req.query.status) {
@@ -106,20 +109,53 @@ module.exports.changeMulti = async (req, res) => {
 
 // [POST] /api/v1/task/create
 module.exports.create = async (req, res) => {
-  try {
-    const task = new Task(req.body);
-    const data = await task.save();
-    res.json({
-      code: 200,
-      massage: "Tạo thành công",
-      data: data,
-    });
-  } catch (error) {
-    res.json({
-      code: 400,
-      massage: "Lỗi",
-    });
-  }
+  // try {
+  //   req.body.createdBy = req.user.id;
+  //   const listUser = req.body.listUser;
+  //   console.log(listUser);
+  //   for (const idUser of listUser) {
+  //     const user = await User.findOne({ _id: idUser });
+  //     console.log(user);
+  //   }
+  //   // const task = new Task(req.body);
+  //   // const data = await task.save();
+  //   res.json({
+  //     code: 200,
+  //     massage: "Tạo thành công",
+  //     // sdata: data,
+  //   });
+  // } catch (error) {
+  //   res.json({
+  //     code: 400,
+  //     massage: "Lỗi",
+  //   });
+  // }
+  req.body.createdBy = req.user.id;
+  const listUser = req.body.listUser;
+  console.log(listUser);
+  // for (const idUser of listUser) {
+  //   const user = await User.findOne({ _id: ObjectId(idUser) });
+  //   console.log(user);
+  // }
+  const test = await User.findOne({ _id: "123456789qazwsxedcrfvtgb" });
+  console.log(test);
+  // const task = new Task(req.body);
+  // const data = await task.save();
+  res.json({
+    code: 200,
+    massage: "Tạo thành công",
+    // sdata: data,
+  });
+  // req.body.createdBy = req.user.id;
+  // const listUser = req.body.listUser;
+  // console.log(listUser);
+  // // const task = new Task(req.body);
+  // // const data = await task.save();
+  // res.json({
+  //   code: 200,
+  //   massage: "Tạo thành công",
+  //   // sdata: data,
+  // });
 };
 
 // [PATCH] /api/v1/task/edit/:id

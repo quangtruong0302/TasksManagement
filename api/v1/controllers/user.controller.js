@@ -200,3 +200,21 @@ module.exports.detail = async (req, res) => {
     });
   }
 };
+
+module.exports.listUser = async (req, res) => {
+  try {
+    const users = await User.find({ deleted: false }).select(
+      "-password -tokenUser"
+    );
+    res.json({
+      code: 200,
+      message: "Thành công",
+      data: users,
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Lỗi",
+    });
+  }
+};
